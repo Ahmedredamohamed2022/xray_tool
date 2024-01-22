@@ -1,0 +1,116 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-tran-thd/thd-sin.sch
+**.subckt thd-sin
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+X1 vout vdd vss ibiasn vip vout ndiff-ota-circuit
+vip vip VSS sin(${VCOM} ${VPEAKTHD} ${FTHD})
+C1 vout vss ${CL} m=1
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.options savecurrents
+.option wnflag=1
+.control
+set wr_singlescale
+set wr_vecnames
+declare thd_vo
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+run
+op
+tran ${TSTEP} ${TSTOP}  ${TSAVE}
+*plot v(vip) v(vout)
+let vi=v(vip)
+let vo=v(vout)-${VCOM}
+let vx=v(vip)-${VCOM}
+fourier ${FUNDFREQ} vi vo
+let idx = 2
+let sum_mag_square = 0
+while idx < 10
+    let mag = fourier11[1][idx]
+    let sum_mag_square = sum_mag_square + mag * mag
+    let idx = idx + 1
+end
+let root_sum_mag_square = sqrt(sum_mag_square)
+let thd_vi = root_sum_mag_square / fourier11[1][1] * 100
+print thd_vi
+let idx = 2
+let sum_mag_square = 0
+while idx < 10
+    let mag = fourier12[1][idx]
+    let sum_mag_square = sum_mag_square + mag * mag
+    let idx = idx + 1
+end
+let root_sum_mag_square = sqrt(sum_mag_square)
+let thd_vo = root_sum_mag_square / fourier12[1][1] * 100
+print thd_vo
+echo  $&thd_vo >> thd.txt
+echo  ${VPEAKTHD} >> thd.txt
+echo  ${FUNDFREQ}  >> thd.txt
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/tran/thd/rawfiles/thd.raw
++ {thd_vi} {thd_vo}
+set specwindow = rectangular
+setplot tran1
+linearize vo
+fft vo
+plot mag(vo)
+echo  fft eol >> out.txt
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/tran/thd/rawfiles/fft.raw
++ {mag(vo)}
+exit
+.endc
+.GLOBAL GND
+.end
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/spice/folded_cascode/ndiff-ota-circuit.sch
+.subckt ndiff-ota-circuit  vout vdd vss ibiasn vip vin
+*.PININFO vdd:I vss:I vip:I vin:I vout:O ibiasn:I
+XM1 net3 vip net1 vss sky130_fd_pr__nfet_01v8_lvt L=${L1} W=${W1} nf=${NF1} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT1} m=${MULT1}
+XM2 net2 vin net1 vss sky130_fd_pr__nfet_01v8_lvt L=${L2} W=${W2} nf=${NF2} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT2} m=${MULT2}
+XM3 net3 net5 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=${L3} W=${W3} nf=${NF3} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT3} m=${MULT3}
+XM9 net4 net4 vss vss sky130_fd_pr__nfet_01v8_lvt L=${L9} W=${W9} nf=${NF9} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT9} m=${MULT9}
+XM10 vout net4 vss vss sky130_fd_pr__nfet_01v8_lvt L=${L10} W=${W10} nf=${NF10} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT10} m=${MULT10}
+XM11 net1 ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=${L11} W=${W11} nf=${NF11} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT11} m=${MULT11}
+XM7 net5 ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=${L7} W=${W7} nf=${NF7} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT7} m=${MULT7}
+XM8 ibiasn ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=${L8} W=${W8} nf=${NF8} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT8} m=${MULT8}
+XM12 net5 net5 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=${L12} W=${W12} nf=${NF12} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT12} m=${MULT12}
+XM13 net6 ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=${L13} W=${W13} nf=${NF13} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT13} m=${MULT13}
+XM14 net6 net6 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=${L14} W=${W14} nf=${NF14} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT14} m=${MULT14}
+XM4 net2 net5 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=${L4} W=${W4} nf=${NF4} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT4} m=${MULT4}
+XM5 net4 net6 net3 vdd sky130_fd_pr__pfet_01v8_lvt L=${L5} W=${W5} nf=${NF5} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT5} m=${MULT5}
+XM6 vout net6 net2 vdd sky130_fd_pr__pfet_01v8_lvt L=${L6} W=${W6} nf=${NF6} ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=${MULT6} m=${MULT6}
+.ends

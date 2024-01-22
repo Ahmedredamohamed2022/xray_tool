@@ -1,0 +1,48 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/spice/folded_cascode/ndiff-ota-circuit.sch
+.subckt ndiff-ota-circuit vdd vss vip vin vout ibiasn
+*.PININFO vdd:I vss:I vip:I vin:I vout:O ibiasn:I
+XM1 net3 vip net1 vss sky130_fd_pr__nfet_01v8_lvt L=$L1@ W=$W1@ nf=$NF1@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT1@ m=$MULT1@
+XM2 net2 vin net1 vss sky130_fd_pr__nfet_01v8_lvt L=$L2@ W=$W2@ nf=$NF2@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT2@ m=$MULT2@
+XM3 net3 net5 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=$L3@ W=$W3@ nf=$NF3@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT3@ m=$MULT3@
+XM9 net4 net4 vss vss sky130_fd_pr__nfet_01v8_lvt L=$L9@ W=$W9@ nf=$NF9@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT9@ m=$MULT9@
+XM10 vout net4 vss vss sky130_fd_pr__nfet_01v8_lvt L=$L10@ W=$W10@ nf=$NF10@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT10@ m=$MULT10@
+XM11 net1 ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=$L11@ W=$W11@ nf=$NF11@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT11@ m=$MULT11@
+XM7 net5 ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=$L7@ W=$W7@ nf=$NF7@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT7@ m=$MULT7@
+XM8 ibiasn ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=$L8@ W=$W8@ nf=$NF8@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT8@ m=$MULT8@
+XM12 net5 net5 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=$L12@ W=$W12@ nf=$NF12@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT12@ m=$MULT12@
+XM13 net6 ibiasn vss vss sky130_fd_pr__nfet_01v8_lvt L=$L13@ W=$W13@ nf=$NF13@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT13@ m=$MULT13@
+XM14 net6 net6 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=$L14@ W=$W14@ nf=$NF14@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT14@ m=$MULT14@
+XM4 net2 net5 vdd vdd sky130_fd_pr__pfet_01v8_lvt L=$L4@ W=$W4@ nf=$NF4@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT4@ m=$MULT4@
+XM5 net4 net6 net3 vdd sky130_fd_pr__pfet_01v8_lvt L=$L5@ W=$W5@ nf=$NF5@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT5@ m=$MULT5@
+XM6 vout net6 net2 vdd sky130_fd_pr__pfet_01v8_lvt L=$L6@ W=$W6@ nf=$NF6@ ad='int((nf+1)/2) * W/nf * 0.29'
++ as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)'
++ nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=$MULT6@ m=$MULT6@
+.ends
+.end

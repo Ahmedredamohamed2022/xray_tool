@@ -1,0 +1,38 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-dc-sweep-icmr/dcsweepicmr.sch
+**.subckt dcsweepicmr
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+vip vip VSS ${VCOM}
+X1 vout vdd vss ibiasn vip vout ndiff-ota-circuit
+C1 vout vss ${CL} m=1
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.options savecurrents
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+save all@vout
+run
+op
+dc vip ${ICMRVSTART} ${ICMRVSTOP}  ${ICMRVSTEP} 
+let vdd=${VDD}
+let vdiff=v(vip)-v(vout)
+let id5=@m.x1.xm5.msky130_fd_pr__nfet_01v8_lvt[id]
+plot v(vout) v(vip)
+plot vdiff
+plot id5
+meas dc vimin when vdiff=0
+echo $&vimin  >> vimin.txt	
+write  /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/dc/icmr/rawfiles/icmr.raw
++ {vimin} {v(vip)}  {v(vout)}
+exit
+.endc
+.GLOBAL GND
+.end

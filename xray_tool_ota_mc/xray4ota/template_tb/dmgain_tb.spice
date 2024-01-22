@@ -1,0 +1,50 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-ac-openloop/openloopgain-dm.sch
+**.subckt openloopgain-dm
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+V3 vip VSS ${VCOM} ac=1
+V4 vin VSS ${VCOM}
+X1 vout vdd vss ibiasn vip vin ndiff-ota-circuit
+C1 vout vss ${CL} m=1
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.option wnflag=1 
+.option TEMP=${TEMP_VAL}
+.option TNOM=${TNOM_VAL}
+.control
+set wr_singlescale
+set wr_vecnames
+set appendwrite
+save all
+run 
+OP
+set filetype=binary
+**set filetype=ascii
+ac dec ${ND} ${FSTART} ${FSTOP}
+set units = degrees
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+plot db(vout) phase(vout)
+meas ac Avd FIND vdb(vout) AT=10
+meas ac GBW WHEN vdb(vout)= 0
+let P = 180 + phase(vout)
+meas ac PM FIND P WHEN vdb(vout)=0
+let dcgain3db=Avd-3
+meas ac bandwidth when vdb(vout)=dcgain3db
+let vo_db=db(vout)
+let vo_ph=phase(vout)
+echo  $&Avd  >> dmgain.txt
+echo  $&GBW  >> dmgain.txt
+echo  $&PM  >> dmgain.txt
+echo  $&bandwidth  >> dmgain.txt
+write  /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/ac/dm/rawfiles/dmgain.raw
++   {vo_db} {vo_ph}  {Avd} {GBW} {PM} {bandwidth}
+exit
+.endc
+.end
+.GLOBAL GND
+.end

@@ -1,0 +1,41 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-ac-openloop/openloopgain-cm.sch
+**.subckt openloopgain-cm
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+V3 vip net1 ${VCOM}
+V4 vin net1 ${VCOM}
+X1 vout vdd vss ibiasn vip vin ndiff-ota-circuit
+V5 net1 vss 0 ac=1
+C1 vout vss ${CL} m=1
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.option TEMP=${TEMP_VAL}
+.option TNOM=${TNOM_VAL}
+.option wnflag=1 
+.control
+set wr_singlescale
+set wr_vecnames
+set appendwrite
+save all
+run 
+OP
+**set filetype=binary
+set filetype=ascii
+ac dec ${ND} ${FSTART} ${FSTOP}
+set units = degrees
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+plot db(vout) phase(vout)
+meas ac Acm FIND vdb(vout) AT=10
+echo  $&Acm  >> cmgain.txt
+write  /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/ac/cm/rawfiles/cmgain.raw
++   {Acm}
+exit
+.endc
+.end
+.GLOBAL GND
+.end

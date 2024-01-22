@@ -1,0 +1,39 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-ac-noise/ionoise.sch
+**.subckt ionoise
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+X1 vout vdd vss ibiasn vip vout ndiff-ota-circuit
+vip vip VSS ${VCOM} ac=1
+C1 vout vss ${CL} m=1
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.options savecurrents
+.option wnflag=1
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+unset sqrnoise
+save all
+run
+op
+noise v(vout) vip dec ${NND} ${NFSTART} ${NFSTOP}
+setplot noise1
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/ac/noise/rawfiles/noise_spectrum.raw
++ {inoise_spectrum}  {onoise_spectrum}
+plot inoise_spectrum  onoise_spectrum
+setplot noise2
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/ac/noise/rawfiles/noise_total.raw
++ {inoise_total} {onoise_total}
+print inoise_total onoise_total
+echo  $&inoise_total  >> inoise.txt
+echo  ${NFSTOP}  >> inoise.txt
+exit
+.endc
+.GLOBAL GND
+.end

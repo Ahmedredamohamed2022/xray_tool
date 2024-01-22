@@ -1,0 +1,41 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-tran-slewrate/closeloopslewrate.sch
+**.subckt closeloopslewrate
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+vip vip VSS ${VCOM} pulse(${VPULSHIGH} ${VPULSLOW} ${VPULSDELAY} ${VPULSDTR} ${VPULSTF} ${VPULSTH} ${VPULSTPERIOD})
+C1 vout vss ${CL} m=1
+X1 vout vdd vss ibiasn vip vout ndiff-ota-circuit
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.options savecurrents
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+save all@vout
+run
+op
+tran ${SRTSTEP} ${SRTSTOP} ${SRTSAVE} 
+let vdd=${VDD}
+let valout1=${vout20}
+let valout2=${vout80}
+meas tran deltatrise trig v(Vout) val={$&valout1} rise=1 targ v(Vout) val={$&valout2} rise=1
+meas tran deltatfall trig v(Vout) val={$&valout1} fall=1 targ v(Vout) val={$&valout2} fall=1
+let srpos=(valout2-valout1)/deltatrise
+let srneg=(valout2-valout1)/deltatfall
+let sr=(srpos+srneg)/2
+print srpos srneg
+plot v(vout) v(vip)
+echo  $&sr  >> sr.txt
+write  /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/tran/sr/rawfiles/slewrate.raw
++   {srpos} {srneg} {sr} {v(vip)} {v(vout)}
+exit
+.endc
+.GLOBAL GND
+.end

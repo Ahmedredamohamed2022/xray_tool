@@ -1,0 +1,64 @@
+
+############################### DC Q-operating point
+Total Current (A)            :   7.10188E-05
+Total Power (W)              :   0.000127834
+############################### Offset 
+Offset(V)                    :   0.0024598
+
+############################### Vin_min 
+Vin_min(V)                   :   0.547968
+
+############################### Ac analysis (diff mode gain ) 
+Dc-Gain(dB)                  :   43.0194
+Gain Bandwidth Product (Hz)  :   1.58434E+07
+Phase Margin (Deg)           :   76.8771
+Bandwidth (Hz)               :   112787
+
+############################### Ac analysis (common mode gain ) 
+Common Mode Gain (dB)        :   -35.7242
+CMRR (dB)                    :   78.7436
+
+############################### Ac analysis (power supply rejection +ve )
+PSR+  (dB)                   :   -30.7946
+PSRR+ (dB)                   :   73.814
+
+############################### Ac analysis (power supply rejection -ve )
+PSR- (dB)                    :   -1.84785E-07
+PSRR- (dB)                   :   43.019400184785
+
+############################### Ac analysis (input reffered noise ) 
+Total Input Refered Noise (V):   2.28478E-05
+Over Operating Frequency     :   1MEG
+
+############################### slew rate 
+Slew Rate (V/sec)            :   2.07351E+06
+
+############################### THD 
+Total Harmonic Distortion (%):   4.85748
+@ Peak Voltage (V)           :   0.65
+@ Operating Frequency  (Hz)  :   1k
+
+############################### Monte carlo of Dc-gain (AV) 
+# run of AV        :   1000
+Mean               :   4.10e+01
+Standard Deviation :   5.27e+00
+CP                 :   3.16
+CPK                :   2.59
+
+############################### Monte carlo of Gain BandWidth Product (GBW) 
+# run of GBW       :   1000
+Mean               :   1.57e+07
+Standard Deviation :   8.46e+05
+CP                 :   9.65
+CPK                :   5.79
+
+############################### Monte carlo of Phase Margin (PM) 
+# run of PM        :   1000
+Mean               :   7.68e+01
+Standard Deviation :   2.76e+00
+CP                 :   2.72
+CPK                :   1.59
+
+############################### Cost Evaluation (FOM) 
+FOM1=Cl*SR/Pd  (f.v/s.w)    :   1.62e-02
+FOM2=Cl*GBW/Pd (f.Hz/w)     :   1.24e-01

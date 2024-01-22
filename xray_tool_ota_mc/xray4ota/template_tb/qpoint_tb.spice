@@ -1,0 +1,40 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-dc-qpoint/dc-qpoint.sch
+**.subckt dc-qpoint
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+V3 vip VSS ${VCOM}
+V4 vin VSS ${VCOM}
+X1 vout vdd vss ibiasn vip vin ndiff-ota-circuit
+C1 vout vss ${CL} m=1
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.options savecurrents
+.option TEMP=${TEMP_VAL}
+.option TNOM=${TNOM_VAL}
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+OP
+let vdd=${VDD}
+let iota=abs(v2#branch)
+let pota=abs(vdd*iota)
+print iota
+print pota
+echo "iota:" >> operatingpoint.txt
+echo $&iota  >> operatingpoint.txt
+echo $&iota  >> iota.txt
+echo $&pota  >> iota.txt
+write  /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/dc/op/rawfiles/dcop.raw
++  {iota} {pota} 
+exit
+.endc
+.GLOBAL GND
+.end
+

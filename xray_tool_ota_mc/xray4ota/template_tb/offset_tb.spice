@@ -1,0 +1,38 @@
+** sch_path:
+*+ /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/ndiff-ota/tb-dc-sweep-offset/closeloopoffset.sch
+**.subckt closeloopoffset
+V1 vss GND 0
+V2 vdd vss ${VDD}
+I0 vdd ibiasn ${IBIASN}
+vip vip VSS ${VCOM}
+X1 vout vdd vss ibiasn vip vout ndiff-ota-circuit
+C1 vout vss ${CL} m=1
+**** begin user architecture code
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.options savecurrents
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+save all@vout
+run
+op
+dc vip ${DCSWEEPSTART} ${DCSWEEPSTOP} ${DCSWEEPSTEP} 
+let vdd=${VDD}
+plot v(vout) v(vip)
+let vcom=${VCOM}
+meas dc vo2 find v(vout) at=vcom
+print vo2
+let offset=abs(vo2-vcom)
+print offset
+echo $&offset  >> offset.txt	
+write  /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/ota-2stage/xray4ota/dc/offset/rawfiles/offset.raw
++   {offset} {v(vip)}  {v(vout)}
+exit
+.endc
+.GLOBAL GND
+.end
