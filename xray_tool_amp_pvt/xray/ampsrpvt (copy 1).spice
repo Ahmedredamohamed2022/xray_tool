@@ -1,0 +1,102 @@
+** NOTE: ngspice DOES NOT handle environment variables used in the test benches. the Makefile handles that for you, if you wish to use your own command make sure you manually update the spice files
+VSS2 VSS GND 0
+.save i(VSS2)
+vtot net1 VDD 0
+.save i(vtot)
+VDD1 EN VSS 1.8
+.save i(VDD1)
+VDD2 net1 VSS ${VDD_VAL}
+.save i(VDD2)
+VDD3 VIP VSS pulse(0.9 2.4 0 10ns 10ns 1us 2us)
+.save i(VDD3)
+C2 VOUT VSS 5p m=1
+R1 net2 VSS 10k m=1
+
+x2 VOUT VIP EN VOUT VDD VSS EF_AMP3V3
+
+
+
+
+.options RSHUNT=1e15
+.options savecurrents
+.option TEMP=${TEMP_VAL}
+.option TNOM=${TEMP_VAL}
+.option interp
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+run
+op
+tran 1n 2u 1n
+plot VIP VOUT
+
+let VDD=${TEMP_VAL}
+let vstepmin=0.9
+let vstepmax=2.4
+let vstepdleta=vstepmax-vstepmin
+
+let vstepmin10=(vstepdleta*0.1)+vstepmin
+let vstepmin90=(vstepdleta*0.9)+vstepmin
+
+print vstepmin10 vstepmin90
+
+meas tran deltatrise trig v(VOUT) val=vstepmin10 rise=1 targ v(VOUT) val=vstepmin90 rise=1
+
+meas tran deltatfall trig v(VOUT) val=vstepmin90 fall=1 targ v(VOUT) val=vstepmin10 fall=1
+
+print deltatrise  deltatfall
+
+let srpos=vstepdleta/deltatrise
+let srneg=vstepdleta/deltatfall
+let sr=(srpos+srneg)/2
+
+print srpos srneg sr
+*let VOUT_st=0.98*vstepmax
+*meas tran st WHEN v(VOUT)=VOUT_st
+*print st VOUT_st
+meas tran vmax MAX v(VOUT) from=0u to=1u
+
+echo Ive_measured_maximum_v(VOUT)=$&vmax
+
+meas tran tmax MAX_AT v(VOUT) from=0u to=1u
+echo the_maximum_is_at_time_=_$&tmax
+
+let vth = 0.99 * vstepmax
+meas tran st1 TRIG AT=0 TARG v(VOUT) VAL=vth CROSS=1
+meas tran st2 TRIG AT=0 TARG v(VOUT) VAL=vth CROSS=2
+meas tran st3 TRIG AT=0 TARG v(VOUT) VAL=vth CROSS=3
+*meas tran st4 TRIG AT=0 TARG v(VOUT) VAL=vth CROSS=4
+*meas tran st5 TRIG AT=0 TARG v(VOUT) VAL=vth CROSS=5
+
+
+print vth
+print st1
+print st2
+print st3
+print st4
+*print st5
+let pvt_c=${ENUMER_CASE_NBR}+1
+let VDD_VAL=${VDD_VAL} 
+let DVDD_VAL=${DVDD_VAL} 
+let TEMP_VAL=${TEMP_VAL}
+
+echo "TEMP ${TEMP_VAL} VDD ${VDD_VAL} DVDD ${DVDD_VAL} e:${ENUMER_CASE_NBR}_tran:${CORNERS}_temp:${TEMP_VAL}_VDD:${VDD_VAL}" "srpos" $&srpos "srneg" $&srneg "sr" $&sr "st1" $&st1  "st2" $&st2 "st3" $&st3 eol  >> out.txt	   
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampsrpvt/rawfiles-enumer/e:${ENUMER_CASE_NBR}_temp:${TEMP_VAL}__VDD:${VDD_VAL}_DVDD:${DVDD_VAL}_tran:${CORNERS}.raw 
++ {srpos} {srneg}  {sr} {st1} {st2} {st3}  {v(vout)} {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampsrpvt/rawfiles/pvt{$&pvt_c}.raw 
++ {srpos} {srneg}  {sr} {st1} {st2} {st3}  {v(vout)} {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+
+
+.endc
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hvl/spice/sky130_fd_sc_hvl.spice
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.include /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/EF_AMP3V3.spice
+
+.GLOBAL GND
+.end

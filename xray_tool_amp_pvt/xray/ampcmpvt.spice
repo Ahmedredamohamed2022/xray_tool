@@ -1,0 +1,71 @@
+** NOTE: ngspice DOES NOT handle environment variables used in the test benches. the Makefile handles that for you, if you wish to use your own command make sure you manually update the spice files
+***********************************cl=5pf, 10K RL**********************
+
+VSS2 VSS GND 0
+.save i(VSS2)
+vtot net1 VDD 0
+.save i(vtot)
+VDD1 EN VSS 1.8
+.save i(VDD1)
+VDD2 net1 VSS ${VDD_VAL}
+.save i(VDD2)
+C1 VOUT VSS 5p m=1
+
+x1 VOUT VIP EN VIN VDD VSS EF_AMP3V3
+
+
+V3 VIP net2 1.65
+.save i(v3)
+V4 VIN net2 1.65
+.save i(v4)
+V5 net2 VSS 0 ac=1
+.save i(v5)
+R1 VOUT VSS 10k m=1
+
+
+.options RSHUNT=1e15
+.options savecurrents
+.option TEMP=${TEMP_VAL}
+.option TNOM=${TEMP_VAL}
+
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+run
+op
+ac dec 100 1 100MEG
+set units = degrees
+plot db(VOUT) phase(VOUT)
+let iota=abs(VDD2#branch)
+meas ac Acm FIND vdb(VOUT) AT=10
+
+let pvt_c=${ENUMER_CASE_NBR}+1
+let VDD_VAL=${VDD_VAL} 
+let DVDD_VAL=${DVDD_VAL} 
+let TEMP_VAL=${TEMP_VAL}
+
+
+echo "TEMP ${TEMP_VAL} VDD ${VDD_VAL} DVDD ${DVDD_VAL} e:${ENUMER_CASE_NBR}_tran:${CORNERS}_temp:${TEMP_VAL}_VDD:${VDD_VAL}" "Acm" $&Acm  eol  >> out.txt	   
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampcmpvt/rawfiles-enumer/e:${ENUMER_CASE_NBR}_temp:${TEMP_VAL}__VDD:${VDD_VAL}_DVDD:${DVDD_VAL}_tran:${CORNERS}.raw 
++ {Acm} {v(vout)} {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampcmpvt/rawfiles/pvt{$&pvt_c}.raw 
++ {Acm} {v(vout)} {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+
+.endc
+
+
+
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hvl/spice/sky130_fd_sc_hvl.spice
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.include /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/EF_AMP3V3.spice
+
+
+
+.GLOBAL GND
+.end

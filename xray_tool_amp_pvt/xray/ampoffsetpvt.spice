@@ -1,0 +1,70 @@
+** NOTE: ngspice DOES NOT handle environment variables used in the test benches. the Makefile handles that for you, if you wish to use your own command make sure you manually update the spice files
+VSS2 VSS GND 0
+.save i(VSS2)
+vtot net1 VDD 0
+.save i(vtot)
+VDD1 EN VSS 1.8
+.save i(VDD1)
+VDD2 net1 VSS ${VDD_VAL}
+.save i(VDD2)
+VDD3 VIP VSS 1.65 ac=0
+.save i(VDD3)
+x1 VOUT VIP EN VOUT VDD VSS EF_AMP3V3
+C2 VOUT VSS 5p m=1
+R1 net2 VSS 10k m=1
+.options RSHUNT=1e15
+.options savecurrents
+.option TEMP=${TEMP_VAL}
+.option TNOM=${TEMP_VAL}
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+run
+op
+dc VDD3 0 3.3 10m
+let iota=abs(VDD2#branch)
+plot VIP VOUT
+plot iota
+print vecmax(iota)
+plot VOUT-VIP
+let vdev=VOUT-VIP
+let maxvdef=vecmax(vdev)
+let maxvdef1=vecmax(vdev)*(1-0.01)
+
+print vecmax(vdev)
+meas dc viminlimit WHEN vdev=0 CROSS=1
+meas dc vimaxlimit WHEN vdev=maxvdef1
+meas dc vimin TRIG AT=0 TARG vdev VAL=0 CROSS=1
+meas dc vimax TRIG AT=0 TARG vdev VAL=0 CROSS=2
+
+meas dc VOUTffset FIND vdev AT=1.65
+let offset=abs(VOUTffset)
+print offset
+let pvt_c=${ENUMER_CASE_NBR}+1
+let VDD_VAL=${VDD_VAL} 
+let DVDD_VAL=${DVDD_VAL} 
+let TEMP_VAL=${TEMP_VAL}
+
+echo "TEMP ${TEMP_VAL} VDD ${VDD_VAL} DVDD ${DVDD_VAL} e:${ENUMER_CASE_NBR}_tran:${CORNERS}_temp:${TEMP_VAL}_VDD:${VDD_VAL}" "offset" $&offset eol  >> out.txt	   
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampoffsetpvt/rawfiles-enumer/e:${ENUMER_CASE_NBR}_temp:${TEMP_VAL}__VDD:${VDD_VAL}_DVDD:${DVDD_VAL}_tran:${CORNERS}.raw 
++ {offset} {vimin} {vimax}  {v(vout)} {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampoffsetpvt/rawfiles/pvt{$&pvt_c}.raw 
++ {offset} {vimin} {vimax}  {v(vout)} {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+
+
+.endc
+
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hvl/spice/sky130_fd_sc_hvl.spice
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.include /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/EF_AMP3V3.spice
+
+
+
+.GLOBAL GND
+.end

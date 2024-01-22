@@ -1,0 +1,70 @@
+ 
+vss2 vss GND 0
+.save i(vss2)
+vtot net1 vdd 0
+.save i(vtot)
+vdd1 ena vss 1.8
+.save i(vdd1)
+vdd2 net1 vss ${VDD_VAL}
+.save i(vdd2)
+vdd3 net2 vss 1.65 ac=1
+.save i(vdd3)
+C1 vo1 vss 5p m=1
+*x1 vdd vo1 ena vss vo EF_BUF3V3X
+R1 vo net2 10000 m=1
+x1 vo vo1 ena vo vdd VSS EF_AMP3V3
+ 
+**** begin user architecture code
+
+
+.options RSHUNT=1e15
+.options savecurrents
+.option TEMP=${TEMP_VAL}
+.option TNOM=${TEMP_VAL}
+
+.control
+**set filetype=binary
+set filetype=ascii
+set color0=white
+set color1=black
+set color3=blue
+set xbrushwidth=3
+save all
+run
+op
+ac dec 100 1 10000MEG
+plot db(vo)
+
+meas ac Avd FIND vdb(vo) AT=10
+let dcgain3db=Avd-3
+meas ac bandwidth when vdb(vo)=dcgain3db
+let cin=1/(2*pi*10000*bandwidth)
+print cin
+
+
+
+let pvt_c=${ENUMER_CASE_NBR}+1
+let VDD_VAL=${VDD_VAL} 
+let DVDD_VAL=${DVDD_VAL} 
+let TEMP_VAL=${TEMP_VAL}
+
+echo "TEMP ${TEMP_VAL} VDD ${VDD_VAL} DVDD ${DVDD_VAL} e:${ENUMER_CASE_NBR}_tran:${CORNERS}_temp:${TEMP_VAL}_VDD:${VDD_VAL}" "cin" $&cin eol  >> out.txt	   
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampcinpvt/rawfiles-enumer/e:${ENUMER_CASE_NBR}_temp:${TEMP_VAL}__VDD:${VDD_VAL}_DVDD:${DVDD_VAL}_tran:${CORNERS}.raw 
++ {cin}  {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+write /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/ampcinpvt/rawfiles/pvt{$&pvt_c}.raw 
++ {cin}  {VDD_VAL}  {DVDD_VAL}  {TEMP_VAL}
+
+.endc
+
+
+
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hvl/spice/sky130_fd_sc_hvl.spice
+.include /ciic/pdk//sky130A/libs.ref/sky130_fd_sc_hd/spice/sky130_fd_sc_hd.spice
+.lib /ciic/pdk//sky130A/libs.tech/ngspice/sky130.lib.spice ${CORNERS}
+.include /ciic/designs/analog-mixed-signal-blocks/Xschem-schematic/EF_AMP3V3/xray/EF_AMP3V3.spice
+
+
+
+
+.GLOBAL GND
+.end
