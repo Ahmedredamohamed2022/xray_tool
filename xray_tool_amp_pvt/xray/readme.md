@@ -1,2 +1,3 @@
-# open terminal window
-# write ./xray4amp.py
+Steps:- 
+1- open terminal window
+2- write ./xray4amp.py
